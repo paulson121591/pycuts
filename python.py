@@ -130,7 +130,7 @@ def execute():
                 mod = pyautogui.locateOnScreen('img/point1.png') 
                 toClick = pyautogui.center(mod)
                 pyautogui.click(toClick) 
-
+#comment
 
     
             except:
