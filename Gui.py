@@ -10,11 +10,12 @@ from os import listdir
 import shutil
 import win32com.client
 from win32com.client import Dispatch, constants
+import re
+import win32com.client
 
 
 
-
-
+    
 
 class MyWidget(QtWidgets.QWidget):
     def __init__(self):
@@ -23,7 +24,8 @@ class MyWidget(QtWidgets.QWidget):
 
         
 
-        self.buttonLoad = QtWidgets.QPushButton("Create Email")
+        self.buttonLoad = QtWidgets.QPushButton("Create Production Email")
+        self.buttonxQuote = QtWidgets.QPushButton("Create Quote Email")
         self.buttonNew = QtWidgets.QPushButton("Auto Collect Data")
         self.buttonSave = QtWidgets.QPushButton("Save Data")
         self.buttonxl = QtWidgets.QPushButton("Consolidate")
@@ -59,6 +61,7 @@ class MyWidget(QtWidgets.QWidget):
         self.lBillingZip = QtWidgets.QLabel('Billing Zip')
         self.inputBillingZip = QtWidgets.QLineEdit()
         self.lBf = QtWidgets.QLabel('BF')
+        self.lPriceBf = QtWidgets.QLabel()
         self.inputBf = QtWidgets.QLineEdit()
         
         self.lPhoneNumber = QtWidgets.QLabel('Phone Number')
@@ -75,7 +78,7 @@ class MyWidget(QtWidgets.QWidget):
         
 
 
-        
+        priceBf=0.00
 
 
 
@@ -110,19 +113,21 @@ class MyWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.inputBillingZip,14,1)  
         self.layout.addWidget(self.lBf,15,0)  
         self.layout.addWidget(self.inputBf,15,1)
+        self.layout.addWidget(self.lPriceBf,15,3)  
         self.layout.addWidget(self.lPhoneNumber,16,0)  
         self.layout.addWidget(self.inputPhoneNumber,16,1)  
         self.layout.addWidget(self.lemail,17,0)  
         self.layout.addWidget(self.inputEmail,17,1)
         self.layout.addWidget(self.lDate,18,0)  
         self.layout.addWidget(self.inputDate,18,1)                
-                                               
+                                            
         self.layout.addWidget(self.buttonLoad,1,3)
         self.layout.addWidget(self.buttonNew,2,3)
         self.layout.addWidget(self.buttonSave,3,3)
         self.layout.addWidget(self.buttonxl,4,3)
         self.layout.addWidget(self.buttonxApproval,5,3)
         self.layout.addWidget(self.buttonxOrder,6,3)
+        self.layout.addWidget(self.buttonxQuote,7,3)
     
         self.setLayout(self.layout)
 
@@ -134,11 +139,13 @@ class MyWidget(QtWidgets.QWidget):
         self.buttonxApproval.clicked.connect(self.approval)
         self.buttonxOrder.clicked.connect(self.order)
         self.inputJobNumber.textChanged[str].connect(self.load)
+        self.buttonxQuote.clicked.connect(self.sendQuote)
+        self.inputBf.textChanged[str].connect(self.calcBf)
+        self.inputQuotedPrice.textChanged[str].connect(self.calcBf)
 
 
     def load(self):
-        #import jobdat
-        #jobdat.load()
+
         
         
         
@@ -216,7 +223,7 @@ class MyWidget(QtWidgets.QWidget):
         
         
         
- 
+
         
     
         
@@ -245,7 +252,7 @@ class MyWidget(QtWidgets.QWidget):
         email = self.inputEmail.text()
         date = self.inputDate.text()
         
-       #save copied info with pickle
+    #save copied info with pickle
         jobInfo = {'jobnumber':jobNumber, 'Job Name': jobName, 'Salesman': salesman,'Designer':designer,'Region':region,'Street Name':street,'Zip Code':zipCode,'Quoted Price':quotedPrice,'Total Price':totalPrice,'Customer Code':customerCode,'Customer Name':customerName,'Billing Street':billingStreet,'Billing City':billingCity,'Billing Zip':billingZip, 'Bf':totalBf,'phonenumber':phoneNumber, 'email':email,'date':date} 
         pickle.dump( jobInfo, open( jobNumber, "wb") )
         
@@ -293,7 +300,7 @@ class MyWidget(QtWidgets.QWidget):
         pyautogui.alert('Data Consolidate')
         
     def approval(self):
-        import win32com.client
+        
         try:
         
             jobNumber = self.inputJobNumber.text() 
@@ -302,7 +309,7 @@ class MyWidget(QtWidgets.QWidget):
 
             o.Visible = False
 
-            wb_path = r'C:\Users\Itw User\Desktop\code\\' + jobNumber + '.xlsx'
+            wb_path = os.getcwd()+'\\' + jobNumber + '.xlsx'
 
             wb = o.Workbooks.Open(wb_path)
 
@@ -310,7 +317,7 @@ class MyWidget(QtWidgets.QWidget):
 
             ws_index_list = [3] #say you want to print these sheets
 
-            path_to_pdf = r'C:\Users\Itw User\Desktop\code\\' + jobNumber + ' Approval.pdf'
+            path_to_pdf = os.getcwd()+'\\' + jobNumber + ' Approval.pdf'
 
             print_area = 'A1:L50'
 
@@ -343,7 +350,7 @@ class MyWidget(QtWidgets.QWidget):
                 os.mkdir(r'O:\Jobs\\'+jobNumber+'\Order')
         
             file = jobNumber+' Approval.pdf'
-            shutil.move(r'C:\Users\Itw User\Desktop\code\\'+file,'O:\Jobs\\'+jobNumber+'\Order\\'+file)
+            shutil.move(os.getcwd()+'\\'+file,'O:\Jobs\\'+jobNumber+'\Order\\'+file)
 
 
     
@@ -351,8 +358,8 @@ class MyWidget(QtWidgets.QWidget):
         except:
             pyautogui.alert('Unable to creatE pdf Have you Consolidated this job yet?')
             
-   
-   
+
+
     def order(self):
         import win32com.client
         try:
@@ -363,7 +370,7 @@ class MyWidget(QtWidgets.QWidget):
 
             o.Visible = False
 
-            wb_path = r'C:\Users\Itw User\Desktop\code\\' + jobNumber + '.xlsx'
+            wb_path = os.getcwd()+'\\' + jobNumber + '.xlsx'
 
             wb = o.Workbooks.Open(wb_path)
 
@@ -371,7 +378,7 @@ class MyWidget(QtWidgets.QWidget):
 
             ws_index_list = [4] #say you want to print these sheets
 
-            path_to_pdf = r'C:\Users\Itw User\Desktop\code\\' + jobNumber + ' Order.pdf'
+            path_to_pdf = os.getcwd()+'\\' + jobNumber + ' Order.pdf'
 
             print_area = 'A1:J50'
             
@@ -404,7 +411,7 @@ class MyWidget(QtWidgets.QWidget):
                 os.mkdir(r'O:\Jobs\\'+jobNumber+'\Order')
             
             file = jobNumber+' Order.pdf'
-            shutil.move(r'C:\Users\Itw User\Desktop\code\\'+file,'O:\Jobs\\'+jobNumber+'\Order\\'+file)
+            shutil.move(os.getcwd()+'\\'+file,'O:\Jobs\\'+jobNumber+'\Order\\'+file)
 
 
         
@@ -420,19 +427,50 @@ class MyWidget(QtWidgets.QWidget):
         phoneNumber=self.inputPhoneNumber.text() 
         date = self.inputDate.text() 
         customerName = self.inputCustomerName
-        
+        sub= str(jobNumber)+'-'+str(jobName)+'-'+'Order'
         const=win32com.client.constants
         olMailItem = 0x0
         obj = win32com.client.Dispatch("Outlook.Application")
         newMail = obj.CreateItem(olMailItem)
-        newMail.Subject = jobNumber+'-'+jobName+'-'+customerName+'Order'
+        newMail.Subject = sub
         newMail.BodyFormat = 2 # olFormatHTML https://msdn.microsoft.com/en-us/library/office/aa219371(v=office.11).aspx
         newMail.HTMLBody = "<HTML><BODY>This one is ready for production <br><br> Thanks,<br><br>Delivery Date:"+date+"<br>Call before Delivery "+phoneNumber+"<br><br>Paul Sfalanga III<br>(864)772-3423</BODY></HTML>"
-        newMail.To = "email@demo.com"
-
+        newMail.To = "tstrayer@paneltruss.com; ty@paneltruss.com; mlowe@paneltruss.com; dickie@paneltruss.com; amarsingill@paneltruss.com; dlawrence@paneltruss.com; akimsey@paneltruss.com"
 
         newMail.display()
         #newMail.Send()
+    def sendQuote(self):
+        
+        jobNumber = self.inputJobNumber.text() 
+        jobName=self.inputJobName.text() 
+        phoneNumber=self.inputPhoneNumber.text() 
+        emailAddress= self.inputEmail.text()
+        date = self.inputDate.text() 
+        customerName = self.inputCustomerName
+        sub= str(jobNumber)+'-'+str(jobName)+'-'+' Panel Truss Quote'
+        const=win32com.client.constants
+        olMailItem = 0x0
+        obj = win32com.client.Dispatch("Outlook.Application")
+        newMail = obj.CreateItem(olMailItem)
+        newMail.Subject = sub
+        newMail.BodyFormat = 2 # olFormatHTML https://msdn.microsoft.com/en-us/library/office/aa219371(v=office.11).aspx
+        newMail.HTMLBody = "<HTML><BODY>Attached to this email it the quote for the trusses you requested.<br><br>Let me know if you have any questions <br>Thanks,<br><br>Paul Sfalanga III<br>(864)772-3423</BODY></HTML>"
+        newMail.To = emailAddress
+
+        newMail.display()     
+    def calcBf(self):
+        bf = float(self.inputBf.text())
+        quotedPrice = self.inputQuotedPrice.text()
+        quotedPrice = re.sub('[!@#$,]', '', quotedPrice)
+
+
+        print (quotedPrice)
+        quotedPrice = float(quotedPrice)
+        bfPrice = quotedPrice/bf
+        bfPrice = round(bfPrice,2)
+        bfPrice = 'Price/BF: $'+str(bfPrice)
+        self.lPriceBf.setText(bfPrice) 
+           
         
                 
         

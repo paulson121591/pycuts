@@ -52,10 +52,11 @@ def new ():
         win32clipboard.CloseClipboard()
     except:
         win32clipboard.CloseClipboard()
-        time.sleep(1)
+        time.sleep(2)
         win32clipboard.OpenClipboard()
         jobName = win32clipboard.GetClipboardData()
         win32clipboard.CloseClipboard()
+    else:
         pass
 
     pyautogui.hotkey('tab')

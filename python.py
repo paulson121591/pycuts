@@ -251,6 +251,8 @@ def execute():
     if action == 'steam':
         webbrowser.open('https://steamcommunity.com')
 
+
+
 def on_press(key):
     if any([key in COMBO for COMBO in COMBINATIONS]):
         current.add(key)
